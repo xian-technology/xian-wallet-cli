@@ -27,6 +27,8 @@ xian-wallet receive primary --qr
 xian-wallet ui
 ```
 
+![The Accounts tab shows a demo balance, public address, and receive QR code](docs/screenshots/account-overview.png)
+
 Use `account restore NAME --mnemonic-file FILE --index INDEX` for the same
 mnemonic-derived address as the browser and mobile wallets. Use
 `account import-key NAME --key-file FILE` for a previously generated raw
@@ -55,6 +57,8 @@ xian-wallet prepare --from primary --to recipient --amount 1.25 --out proposal.j
 xian-wallet approve proposal.json --account primary --out approval.json --textual
 xian-wallet submit proposal.json --approval approval.json
 ```
+
+![Transfer review showing a demo amount, sender, recipient, network, chi limit, and signing controls](docs/screenshots/transaction-review.png)
 
 Use `--token CONTRACT` for a fungible token. `token watch NAME CONTRACT`
 adds a token to `portfolio ACCOUNT`. `activity` reads the local approval and
