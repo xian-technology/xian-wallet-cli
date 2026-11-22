@@ -3,7 +3,7 @@ requires = ["setuptools>=77.0.3", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "xian-tech-wallet-cli"
+name = "xian-wallet-cli"
 version = "0.2.0"
 description = "Xian wallet for terminals and agents"
 readme = "README.md"
@@ -22,6 +22,11 @@ dependencies = [
     "xian-tech-runtime-types>=0.1.6,<0.2",
     "yarl>=1.20,<2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/xian-technology/xian-wallet-cli"
+Documentation = "https://docs.xian.technology/tools/xian-wallet-cli"
+Issues = "https://github.com/xian-technology/xian-wallet-cli/issues"
 
 [project.scripts]
 xian-wallet = "xian_wallet_cli.cli:app"

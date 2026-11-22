@@ -27,7 +27,7 @@ xian-wallet receive primary --qr
 xian-wallet ui
 ```
 
-![The Accounts tab shows a demo balance, public address, and receive QR code](docs/screenshots/account-overview.png)
+![The Accounts tab shows a demo balance, public address, and receive QR code](https://raw.githubusercontent.com/xian-technology/xian-wallet-cli/main/docs/screenshots/account-overview.png)
 
 Use `account restore NAME --mnemonic-file FILE --index INDEX` for the same
 mnemonic-derived address as the browser and mobile wallets. Use
@@ -58,7 +58,7 @@ xian-wallet approve proposal.json --account primary --out approval.json --textua
 xian-wallet submit proposal.json --approval approval.json
 ```
 
-![Transfer review showing a demo amount, sender, recipient, network, chi limit, and signing controls](docs/screenshots/transaction-review.png)
+![Transfer review showing a demo amount, sender, recipient, network, chi limit, and signing controls](https://raw.githubusercontent.com/xian-technology/xian-wallet-cli/main/docs/screenshots/transaction-review.png)
 
 Use `--token CONTRACT` for a fungible token. `token watch NAME CONTRACT`
 adds a token to `portfolio ACCOUNT`. `activity` reads the local approval and
@@ -70,7 +70,7 @@ Use `call CONTRACT FUNCTION --args ARGS.json` for read-only simulation.
 Use `prepare-call` to prepare a typed write. Generic fractional values use
 `{"__fixed__":"1.25"}`. The simulator and signing flow share the exact
 payload. `dex`, `nft`, `message`, `x402`, `shielded`, and `walletconnect`
-provide the product-specific workflows in the [wallet guide](docs/WALLET.md).
+provide the product-specific workflows in the [wallet guide](https://github.com/xian-technology/xian-wallet-cli/blob/main/docs/WALLET.md).
 
 ## Agent approvals
 
@@ -80,7 +80,7 @@ Telegram bot. The agent then uses `agent fetch` to obtain the signed approval
 and submits it with `submit`. Use `grant` to opt into autonomous, revocable
 transfers within an account, network, asset, recipient, amount, chi budget,
 and expiry. The agent needs the signer socket or an SSH socket forward and
-the relevant bearer credential. [Signer setup and examples](docs/WALLET.md#agent-approvals)
+the relevant bearer credential. [Signer setup and examples](https://github.com/xian-technology/xian-wallet-cli/blob/main/docs/WALLET.md#agent-approvals)
 
 Put `--json` before the command for one `xian-wallet-cli/v1` result on stdout.
 Amounts are decimal strings. Normal usage errors go to stderr.
@@ -108,8 +108,8 @@ node --test tests/walletconnect.test.mjs
 
 ## Related Docs
 
-- [Wallet guide](docs/WALLET.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Backlog](docs/BACKLOG.md)
-- [Xian Python SDK](../xian-py/README.md)
-- [Agent wallet skill](../xian-ai-skills/xian-wallet-cli-skill/SKILL.md)
+- [Wallet guide](https://github.com/xian-technology/xian-wallet-cli/blob/main/docs/WALLET.md)
+- [Architecture](https://github.com/xian-technology/xian-wallet-cli/blob/main/docs/ARCHITECTURE.md)
+- [Backlog](https://github.com/xian-technology/xian-wallet-cli/blob/main/docs/BACKLOG.md)
+- [Xian Python SDK](https://github.com/xian-technology/xian-py)
+- [Agent wallet skill](https://github.com/xian-technology/xian-ai-skills/blob/main/xian-wallet-cli-skill/SKILL.md)
