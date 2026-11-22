@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/xian-wallet-cli/
+      url: https://pypi.org/project/xian-tech-wallet-cli/
     permissions:
       id-token: write
     steps:

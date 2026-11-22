@@ -112,10 +112,10 @@ This flow uses GET resources and the SDK's Xian x402 v2 exact profile.
 
 ## Shielded notes
 
-Install the optional proof SDK with `uv sync --extra shielded`. Select the
-profile for a chain with the zk feature, a deployed shielded-note contract,
-its matching registered proof bundle, and BDS. Keep encrypted snapshots
-and recovery seeds with the owner.
+Install the optional proof SDK with `uv tool install 'xian-tech-wallet-cli[shielded]'`.
+Select the profile for a chain with the zk feature, a deployed shielded-note
+contract, its matching registered proof bundle, and BDS. Keep encrypted
+snapshots and recovery seeds with the owner.
 
 - `shielded create CONTRACT --out snapshot.json` creates a shielded account.
   Use `--seed-file` to recover one. `shielded export-recovery` writes an

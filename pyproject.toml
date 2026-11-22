@@ -3,8 +3,8 @@ requires = ["setuptools>=77.0.3", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "xian-wallet-cli"
-version = "0.2.0"
+name = "xian-tech-wallet-cli"
+version = "0.2.1"
 description = "Xian wallet for terminals and agents"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"

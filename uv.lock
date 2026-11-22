@@ -728,23 +728,8 @@ wheels = [
 ]
 
 [[package]]
-name = "xian-tech-zk"
+name = "xian-tech-wallet-cli"
 version = "0.2.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pynacl" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/09/7e/c48a75b997d1e546cad15411999a26fe616d93804f694b30a93f59bfd3ac/xian_tech_zk-0.2.1.tar.gz", hash = "sha256:b5e81f742cd11ad921c11fba162ef9d1c5a7725aa6e2ebc75274568dadd5c4fe", size = 90526, upload-time = "2026-11-17T22:20:48.311Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/dd/a8/b9f2b916979a4d3c29b1282f7484d020aec76af2ccd9e3eff40bc7a2f138/xian_tech_zk-0.2.1-cp314-abi3-macosx_10_12_x86_64.whl", hash = "sha256:de6d16d40ba0a4da85805e505f8218cccfa6eb449e567064ab37585e114cb6b4", size = 1249344, upload-time = "2026-11-17T22:20:42.093Z" },
-    { url = "https://files.pythonhosted.org/packages/93/81/9c1abe55610dd3b1013ea4e6e9e6acb360318b55b140c4064ddf07f8b599/xian_tech_zk-0.2.1-cp314-abi3-macosx_11_0_arm64.whl", hash = "sha256:2c5e2e77d54c47487ba8b352d139f83e8656696fccdf34cc208b6a589caf972f", size = 1205964, upload-time = "2026-11-17T22:20:43.865Z" },
-    { url = "https://files.pythonhosted.org/packages/00/40/37de6bb22a96ada6f1d39f501843ac263ea61cf1f136f23b80e0bee3d191/xian_tech_zk-0.2.1-cp314-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:64b3a324e157f1aa77ca3104e1aeed966172c5d2775128e3b2c774169c163256", size = 1331209, upload-time = "2026-11-17T22:20:45.417Z" },
-    { url = "https://files.pythonhosted.org/packages/fe/0f/4910306683961fa9081ab8b69dfc9d395b5387e5b9bf4502d63807b59aeb/xian_tech_zk-0.2.1-cp314-abi3-win_amd64.whl", hash = "sha256:3f0cc9150e258c9955c03b2739c694e3b256a54f1141e297e9147f006eee9b62", size = 1106808, upload-time = "2026-11-17T22:20:46.89Z" },
-]
-
-[[package]]
-name = "xian-wallet-cli"
-version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
@@ -792,6 +777,21 @@ dev = [
     { name = "pytest", specifier = ">=9,<10" },
     { name = "pytest-cov", specifier = ">=7,<8" },
     { name = "ruff", specifier = ">=0.15,<0.16" },
+]
+
+[[package]]
+name = "xian-tech-zk"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pynacl" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/09/7e/c48a75b997d1e546cad15411999a26fe616d93804f694b30a93f59bfd3ac/xian_tech_zk-0.2.1.tar.gz", hash = "sha256:b5e81f742cd11ad921c11fba162ef9d1c5a7725aa6e2ebc75274568dadd5c4fe", size = 90526, upload-time = "2026-11-17T22:20:48.311Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/dd/a8/b9f2b916979a4d3c29b1282f7484d020aec76af2ccd9e3eff40bc7a2f138/xian_tech_zk-0.2.1-cp314-abi3-macosx_10_12_x86_64.whl", hash = "sha256:de6d16d40ba0a4da85805e505f8218cccfa6eb449e567064ab37585e114cb6b4", size = 1249344, upload-time = "2026-11-17T22:20:42.093Z" },
+    { url = "https://files.pythonhosted.org/packages/93/81/9c1abe55610dd3b1013ea4e6e9e6acb360318b55b140c4064ddf07f8b599/xian_tech_zk-0.2.1-cp314-abi3-macosx_11_0_arm64.whl", hash = "sha256:2c5e2e77d54c47487ba8b352d139f83e8656696fccdf34cc208b6a589caf972f", size = 1205964, upload-time = "2026-11-17T22:20:43.865Z" },
+    { url = "https://files.pythonhosted.org/packages/00/40/37de6bb22a96ada6f1d39f501843ac263ea61cf1f136f23b80e0bee3d191/xian_tech_zk-0.2.1-cp314-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:64b3a324e157f1aa77ca3104e1aeed966172c5d2775128e3b2c774169c163256", size = 1331209, upload-time = "2026-11-17T22:20:45.417Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/0f/4910306683961fa9081ab8b69dfc9d395b5387e5b9bf4502d63807b59aeb/xian_tech_zk-0.2.1-cp314-abi3-win_amd64.whl", hash = "sha256:3f0cc9150e258c9955c03b2739c694e3b256a54f1141e297e9147f006eee9b62", size = 1106808, upload-time = "2026-11-17T22:20:46.89Z" },
 ]
 
 [[package]]

@@ -7,16 +7,19 @@ use the same Xian SDK transaction format.
 
 ## Install
 
-From the source checkout on macOS or Linux with Python 3.14 and uv:
+Use Python 3.14 and uv on macOS or Linux.
 
 ```sh
-uv sync
-uv run xian-wallet --help
+uv tool install xian-tech-wallet-cli
+xian-wallet --help
 ```
 
-Install the checkout with `uv tool install .` to use `xian-wallet` outside it.
-Control the state directory with `--home` or `XIAN_WALLET_HOME`. It defaults to
-`$XDG_STATE_HOME/xian-wallet` or `~/.local/state/xian-wallet`.
+For shielded notes, install with `uv tool install 'xian-tech-wallet-cli[shielded]'`.
+If uv reports that its executable directory is outside `PATH`, run
+`uv tool update-shell` and open a fresh terminal.
+
+Control the state directory with `--home` or `XIAN_WALLET_HOME`. It defaults
+to `$XDG_STATE_HOME/xian-wallet` or `~/.local/state/xian-wallet`.
 
 ## Accounts and networks
 
@@ -98,6 +101,8 @@ explicit owner replacement. Keep the original hash available until one of
 the competing transactions is finalized.
 
 ## Validation
+
+From a source checkout, use `uv run xian-wallet --help` to run the CLI.
 
 ```sh
 uv run --extra shielded ruff check
