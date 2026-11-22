@@ -303,6 +303,15 @@ wheels = [
 ]
 
 [[package]]
+name = "mnemonic"
+version = "0.21"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ff/77/e6232ed59fbd7b90208bb8d4f89ed5aabcf30a524bc2fb8f0dafbe8e7df9/mnemonic-0.21.tar.gz", hash = "sha256:1fe496356820984f45559b1540c80ff10de448368929b9c60a2b55744cc88acf", size = 152462, upload-time = "2024-01-05T10:46:14.895Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/57/48/5abb16ce7f9d97b728e6b97c704ceaa614362e0847651f379ed0511942a0/mnemonic-0.21-py3-none-any.whl", hash = "sha256:72dc9de16ec5ef47287237b9b6943da11647a03fe7cf1f139fc3d7c4a7439288", size = 92701, upload-time = "2024-01-05T10:46:12.703Z" },
+]
+
+[[package]]
 name = "multidict"
 version = "7.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -565,6 +574,18 @@ wheels = [
 ]
 
 [[package]]
+name = "qrcode"
+version = "8.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8f/b2/7fc2931bfae0af02d5f53b174e9cf701adbb35f39d69c2af63d4a39f81a9/qrcode-8.2.tar.gz", hash = "sha256:35c3f2a4172b33136ab9f6b3ef1c00260dd2f66f858f24d88418a015f446506c", size = 43317, upload-time = "2025-05-01T15:44:24.726Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/dd/b8/d2d6d731733f51684bbf76bf34dab3b70a9148e8f2cef2bb544fccec681a/qrcode-8.2-py3-none-any.whl", hash = "sha256:16e64e0716c14960108e85d853062c9e8bba5ca8252c0b4d0231b9df4060ff4f", size = 45986, upload-time = "2025-05-01T15:44:22.781Z" },
+]
+
+[[package]]
 name = "rich"
 version = "15.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -692,6 +713,11 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/95/0b/67dc928e6f9743ba0d7ead656a9b8bdddb8bbb5afb5529f812d9860972a9/xian_tech_py-0.5.3-py3-none-any.whl", hash = "sha256:6b7809c2cad95ef02affa1c358cd8107523c12bb3a7aad2eda3376bc37eab21b", size = 62460, upload-time = "2026-11-17T22:13:04.773Z" },
 ]
 
+[package.optional-dependencies]
+hd = [
+    { name = "mnemonic" },
+]
+
 [[package]]
 name = "xian-tech-runtime-types"
 version = "0.1.6"
@@ -703,14 +729,24 @@ wheels = [
 
 [[package]]
 name = "xian-tech-wallet-cli"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
+    { name = "aiohttp" },
     { name = "pydantic" },
+    { name = "pynacl" },
+    { name = "qrcode" },
     { name = "rich" },
     { name = "textual" },
     { name = "typer" },
-    { name = "xian-tech-py" },
+    { name = "xian-tech-py", extra = ["hd"] },
+    { name = "xian-tech-runtime-types" },
+    { name = "yarl" },
+]
+
+[package.optional-dependencies]
+shielded = [
+    { name = "xian-tech-zk" },
 ]
 
 [package.dev-dependencies]
@@ -722,18 +758,40 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiohttp", specifier = ">=3.13.5,<4" },
     { name = "pydantic", specifier = ">=2.12,<3" },
+    { name = "pynacl", specifier = ">=1.6,<2" },
+    { name = "qrcode", specifier = ">=8,<9" },
     { name = "rich", specifier = ">=14,<16" },
     { name = "textual", specifier = ">=6,<9" },
     { name = "typer", specifier = ">=0.26,<1" },
-    { name = "xian-tech-py", specifier = ">=0.5.3,<0.6" },
+    { name = "xian-tech-py", extras = ["hd"], specifier = ">=0.5.3,<0.6" },
+    { name = "xian-tech-runtime-types", specifier = ">=0.1.6,<0.2" },
+    { name = "xian-tech-zk", marker = "extra == 'shielded'", specifier = ">=0.2.1,<0.3" },
+    { name = "yarl", specifier = ">=1.20,<2" },
 ]
+provides-extras = ["shielded"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "pytest", specifier = ">=9,<10" },
     { name = "pytest-cov", specifier = ">=7,<8" },
     { name = "ruff", specifier = ">=0.15,<0.16" },
+]
+
+[[package]]
+name = "xian-tech-zk"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pynacl" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/09/7e/c48a75b997d1e546cad15411999a26fe616d93804f694b30a93f59bfd3ac/xian_tech_zk-0.2.1.tar.gz", hash = "sha256:b5e81f742cd11ad921c11fba162ef9d1c5a7725aa6e2ebc75274568dadd5c4fe", size = 90526, upload-time = "2026-11-17T22:20:48.311Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/dd/a8/b9f2b916979a4d3c29b1282f7484d020aec76af2ccd9e3eff40bc7a2f138/xian_tech_zk-0.2.1-cp314-abi3-macosx_10_12_x86_64.whl", hash = "sha256:de6d16d40ba0a4da85805e505f8218cccfa6eb449e567064ab37585e114cb6b4", size = 1249344, upload-time = "2026-11-17T22:20:42.093Z" },
+    { url = "https://files.pythonhosted.org/packages/93/81/9c1abe55610dd3b1013ea4e6e9e6acb360318b55b140c4064ddf07f8b599/xian_tech_zk-0.2.1-cp314-abi3-macosx_11_0_arm64.whl", hash = "sha256:2c5e2e77d54c47487ba8b352d139f83e8656696fccdf34cc208b6a589caf972f", size = 1205964, upload-time = "2026-11-17T22:20:43.865Z" },
+    { url = "https://files.pythonhosted.org/packages/00/40/37de6bb22a96ada6f1d39f501843ac263ea61cf1f136f23b80e0bee3d191/xian_tech_zk-0.2.1-cp314-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:64b3a324e157f1aa77ca3104e1aeed966172c5d2775128e3b2c774169c163256", size = 1331209, upload-time = "2026-11-17T22:20:45.417Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/0f/4910306683961fa9081ab8b69dfc9d395b5387e5b9bf4502d63807b59aeb/xian_tech_zk-0.2.1-cp314-abi3-win_amd64.whl", hash = "sha256:3f0cc9150e258c9955c03b2739c694e3b256a54f1141e297e9147f006eee9b62", size = 1106808, upload-time = "2026-11-17T22:20:46.89Z" },
 ]
 
 [[package]]

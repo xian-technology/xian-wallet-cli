@@ -1,98 +1,110 @@
 # Xian Wallet CLI
 
-`xian-wallet` prepares, reviews, signs, and submits native XIAN transfers on
-a localnet. It uses Typer for commands, Rich for inline previews, Textual
-for keyboard-driven review, and `xian-tech-py` for blockchain operations.
+`xian-wallet` is a terminal wallet for Xian. It combines named accounts,
+encrypted recovery backups, portfolio and activity views, and transaction
+approval for people and agents. The CLI, Textual interface, and signer service
+use the same Xian SDK transaction format.
 
 ## Install
 
-From the wallet checkout, use Python 3.14 and uv. The wallet runs on macOS and
-Linux and uses owner-only POSIX key files.
+From the source checkout on macOS or Linux with Python 3.14 and uv:
 
 ```sh
 uv sync
 uv run xian-wallet --help
 ```
 
-Use `uv run xian-wallet` in the checkout or install the checkout with
-`uv tool install .` and use `xian-wallet` directly.
+Install the checkout with `uv tool install .` to use `xian-wallet` outside it.
+Control the state directory with `--home` or `XIAN_WALLET_HOME`. It defaults to
+`$XDG_STATE_HOME/xian-wallet` or `~/.local/state/xian-wallet`.
 
-## Send on localnet
-
-Set `XIAN_WALLET_RPC` or pass `--rpc` before the command to select a loopback
-RPC. The default is `http://127.0.0.1:26657`. The node must be synced and able
-to serve block 1.
+## Accounts and networks
 
 ```sh
-xian-wallet generate --out owner.key
-xian-wallet balance "$SENDER_ADDRESS"
-xian-wallet prepare --from "$SENDER_ADDRESS" --to "$RECIPIENT_ADDRESS" \
-  --amount 1.25 --out proposal.json
-xian-wallet ui proposal.json
-xian-wallet approve proposal.json --key-file owner.key --out approval.json --textual
+xian-wallet account create primary
+xian-wallet account backup primary --out primary.backup.json
+xian-wallet receive primary --qr
+xian-wallet ui
+```
+
+Use `account restore NAME --mnemonic-file FILE --index INDEX` for the same
+mnemonic-derived address as the browser and mobile wallets. Use
+`account import-key NAME --key-file FILE` for a previously generated raw
+Ed25519 key, `account derive SOURCE NAME --index INDEX` for another account
+from the same recovery phrase, and `account watch NAME ADDRESS` for a public
+address. `account restore-backup FILE` verifies an encrypted CLI backup before
+restoring it. `account export-recovery NAME --out FILE` writes the mnemonic
+to an owner-only file for offline storage.
+
+The vault unlocks only for each sensitive operation and prompts for its
+password locally. Trusted signer processes can use `--password-file` for
+an explicitly provisioned owner-only file. Use a separate OS identity or
+host for a signer that serves agents.
+
+The default RPC is `http://127.0.0.1:26657`. For a saved network, obtain the
+chain ID and first-block hash from a trusted source. Add it with
+`network add NAME URL --chain-id ID --first-block-hash HASH`, then select it
+with `network use NAME` or the global `--network NAME` option. Named profiles
+allow explicit HTTPS RPCs. The node must be synced and serve block 1.
+
+## Review and send
+
+```sh
+xian-wallet contact add recipient "$RECIPIENT_ADDRESS"
+xian-wallet prepare --from primary --to recipient --amount 1.25 --out proposal.json
+xian-wallet approve proposal.json --account primary --out approval.json --textual
 xian-wallet submit proposal.json --approval approval.json
 ```
 
-Use the public address printed by `generate` as `SENDER_ADDRESS` and fund it
-on the localnet before preparing the transfer. Set `RECIPIENT_ADDRESS` to the
-recipient's public address. Use `preview` for inline review or omit
-`--textual` to approve from an inline Rich prompt. Keep the owner key file
-private and backed up. File outputs are written once and use mode `0600`.
+Use `--token CONTRACT` for a fungible token. `token watch NAME CONTRACT`
+adds a token to `portfolio ACCOUNT`. `activity` reads the local approval and
+receipt journal. `incoming ACCOUNT --token CONTRACT` scans a page of
+BDS-indexed transfers. Use the returned `next_offset` to keep scanning if a
+page lacks matches.
 
-## Approve through a messaging client
+Use `call CONTRACT FUNCTION --args ARGS.json` for read-only simulation.
+Use `prepare-call` to prepare a typed write. Generic fractional values use
+`{"__fixed__":"1.25"}`. The simulator and signing flow share the exact
+payload. `dex`, `nft`, `message`, `x402`, `shielded`, and `walletconnect`
+provide the product-specific workflows in the [wallet guide](docs/WALLET.md).
 
-1. The agent runs `xian-wallet --json prepare ... --out proposal.json`. Send
-   the user a review with the full proposal ID, amount, asset, sender, recipient,
-   network, chi limit, and expiry. The approval bridge retains that exact
-   proposal and matches the authenticated user's response to its ID.
-2. After approval, the trusted signer runs
-   `xian-wallet --json approve proposal.json --key-file owner.key --out approval.json --yes`.
-   This can run offline on the owner's machine or in the trusted integration.
-   The integration must authenticate the user and enforce the approval before
-   using `--yes`. It returns the signed approval to the agent.
-3. The agent runs
-   `xian-wallet --json submit proposal.json --approval approval.json`, then
-   follows any pending outcome using
-   `xian-wallet --json receipt "$TX_HASH"`. Both agent commands run without
-   prompts or access to the spending key.
+## Agent approvals
 
-The signed approval authorizes one native transfer. Anyone who receives it can
-relay that specific transaction. The CLI checks expiry before broadcasting.
-The on-chain transaction has a nonce and chain ID, and its signature itself
-does not expire. Keep the approval within the intended handoff. The wallet
-works with any messaging bridge that implements these steps.
+The agent prepares a proposal and submits it to the trusted signer with
+`agent request`. The owner reviews it using the Textual inbox or a configured
+Telegram bot. The agent then uses `agent fetch` to obtain the signed approval
+and submits it with `submit`. Use `grant` to opt into autonomous, revocable
+transfers within an account, network, asset, recipient, amount, chi budget,
+and expiry. The agent needs the signer socket or an SSH socket forward and
+the relevant bearer credential. [Signer setup and examples](docs/WALLET.md#agent-approvals)
 
-## JSON and retries
-
-Put `--json` before the subcommand. Machine responses use schema
-`xian-wallet-cli/v1` with a single `data` or `error` object on stdout.
-Amounts are decimal strings. CLI usage errors such as missing arguments go
-to stderr.
+Put `--json` before the command for one `xian-wallet-cli/v1` result on stdout.
+Amounts are decimal strings. Normal usage errors go to stderr.
 
 | Exit | Meaning |
-| ---- | ------- |
+| --- | --- |
 | 0 | Command succeeded, or transfer committed successfully |
-| 1 | Node rejected admission or confirmed a failed execution |
+| 1 | Admission rejection, failed execution, or failed verification |
 | 2 | Command, input, approval, file, or RPC error |
 | 3 | Final outcome is pending or unknown |
 
-Use the hash in the approval or result to recover after an interrupted
-submission. A repeat submission with the same files uses the same transaction
-bytes and first checks for an existing receipt. A changed recipient, network,
-amount, chi limit, or nonce requires a new proposal and approval. Chi values
-describe computation and transaction limits. A finalized receipt is the
-source of truth for execution; simulation reflects the state at preparation.
+After interruption, use `receipt TX_HASH` or retry the same proposal and
+approval. The wallet only signs competing same-nonce proposals through an
+explicit owner replacement. Keep the original hash available until one of
+the competing transactions is finalized.
 
 ## Validation
 
 ```sh
-uv run ruff check
-uv run ruff format --check
-uv run pytest
+uv run --extra shielded ruff check
+uv run --extra shielded ruff format --check
+uv run --extra shielded pytest
+node --test tests/walletconnect.test.mjs
 ```
 
 ## Related Docs
 
+- [Wallet guide](docs/WALLET.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Backlog](docs/BACKLOG.md)
 - [Xian Python SDK](../xian-py/README.md)

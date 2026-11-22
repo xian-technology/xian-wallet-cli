@@ -13,39 +13,108 @@ from textual.containers import Horizontal, VerticalScroll
 from textual.widgets import Button, Collapsible, Footer, Static
 
 from .chain import now
-from .domain import Plan
+from .domain import Plan, Proposal
 
 ACCENT = "#adff2f"
 
 
-def expiry_text(plan: Plan) -> str:
+def expiry_text(plan: Proposal) -> str:
     return datetime.fromtimestamp(plan.expires_at, UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
 
-def rows(plan: Plan) -> list[tuple[str, str]]:
-    return [
-        ("To", plan.recipient),
+def reviewed_action(plan: Proposal) -> tuple[str, str, list[tuple[str, str]]]:
+    if isinstance(plan, Plan):
+        return "Review transfer", f"{plan.amount} XIAN", [("To", plan.recipient)]
+    args = plan.payload["kwargs"]
+    if plan.contract == "con_dex" and plan.function == "swapExactTokenForToken":
+        return (
+            "Review swap",
+            f"{wire_amount(args.get('amountIn'))} {args.get('src')}",
+            [
+                ("Minimum received", wire_amount(args.get("amountOutMin"))),
+                ("Recipient", str(args.get("to"))),
+                ("Pair", str(args.get("pair"))),
+            ],
+        )
+    if plan.function == "approve" and set(args) == {"amount", "to"}:
+        return (
+            "Review allowance",
+            f"{wire_amount(args['amount'])} {plan.contract}",
+            [
+                ("Spender", str(args["to"])),
+            ],
+        )
+    if plan.function == "transfer" and set(args) == {"token_id", "to"}:
+        return (
+            "Review NFT transfer",
+            f"{plan.contract} / {args['token_id']}",
+            [
+                ("To", str(args["to"])),
+            ],
+        )
+    if plan.function == "transfer" and set(args) == {"amount", "to"}:
+        return (
+            "Review token transfer",
+            f"{wire_amount(args['amount'])} {plan.contract}",
+            [
+                ("To", str(args["to"])),
+            ],
+        )
+    return "Review contract call", f"{plan.contract}.{plan.function}", []
+
+
+def wire_amount(value) -> str:
+    if isinstance(value, dict) and set(value) == {"__fixed__"}:
+        return str(value["__fixed__"])
+    return str(value)
+
+
+def action_title(plan: Proposal) -> str:
+    return reviewed_action(plan)[0]
+
+
+def primary_detail(plan: Proposal) -> str:
+    return reviewed_action(plan)[1]
+
+
+def rows(plan: Proposal) -> list[tuple[str, str]]:
+    scope = [
         ("From", plan.sender),
         ("Network", plan.network.chain_id),
         ("Chi limit", f"{plan.chi_limit:,} (est. {plan.chi_estimate:,})"),
         ("Expires", expiry_text(plan)),
     ]
+    _, _, details = reviewed_action(plan)
+    if isinstance(plan, Plan):
+        return [*details, *scope]
+    arguments = json.dumps(plan.payload["kwargs"], ensure_ascii=True, indent=2)
+    return [*details, *scope, ("Arguments", arguments)]
 
 
-def preview_data(plan: Plan) -> dict:
-    return {
+def preview_data(plan: Proposal) -> dict:
+    data = {
         **plan.model_dump(mode="json"),
         "proposal_id": plan.proposal_id,
-        "asset": "XIAN",
-        "action": "currency.transfer",
+        "action": f"{plan.payload['contract']}.{plan.payload['function']}",
         "expired": now() >= plan.expires_at,
         "payload": plan.payload,
     }
+    data["review"] = {
+        "title": action_title(plan),
+        "summary": primary_detail(plan),
+        "fields": dict(rows(plan)),
+    }
+    if isinstance(plan, Plan):
+        data["asset"] = "XIAN"
+    return data
 
 
-def render_preview(console: Console, plan: Plan) -> None:
+def render_preview(console: Console, plan: Proposal) -> None:
     fields = [
-        ("Amount", Text(f"{plan.amount} XIAN", style=f"bold {ACCENT}")),
+        (
+            "Amount" if isinstance(plan, Plan) else "Call",
+            Text(primary_detail(plan), style=f"bold {ACCENT}"),
+        ),
         *((label, Text(value, overflow="fold")) for label, value in rows(plan)),
         ("Proposal ID", Text(plan.proposal_id, overflow="fold")),
     ]
@@ -63,7 +132,7 @@ def render_preview(console: Console, plan: Plan) -> None:
                 table.add_row(value)
             else:
                 table.add_row(Text.assemble((f"{label}  ", "dim"), value))
-    label = "Expired" if now() >= plan.expires_at else "Review transfer"
+    label = "Expired" if now() >= plan.expires_at else action_title(plan)
     console.print(Panel(table, title=label, title_align="left", border_style=ACCENT))
 
 
@@ -88,7 +157,7 @@ class ReviewApp(App[bool]):
     Footer { background: #111111; color: #ffffff; }
     """
 
-    def __init__(self, plan: Plan, *, allow_sign: bool = False):
+    def __init__(self, plan: Proposal, *, allow_sign: bool = False):
         super().__init__()
         self.plan = plan
         self.allow_sign = allow_sign
@@ -96,8 +165,8 @@ class ReviewApp(App[bool]):
     def compose(self) -> ComposeResult:
         expired = now() >= self.plan.expires_at
         with VerticalScroll():
-            yield Static("Xian Wallet  /  Review transfer", classes="title")
-            yield Static(Text(f"{self.plan.amount} XIAN", overflow="fold"), classes="amount")
+            yield Static(f"Xian Wallet  /  {action_title(self.plan)}", classes="title")
+            yield Static(Text(primary_detail(self.plan), overflow="fold"), classes="amount")
             fields = rows(self.plan)
             identities, attributes = fields[:2], fields[2:]
             for label, value in identities:

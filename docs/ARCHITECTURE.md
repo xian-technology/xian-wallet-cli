@@ -1,39 +1,45 @@
 # Wallet CLI architecture
 
-`domain.py` models the unsigned proposal and signed approval.
-`chain.py` adapts the SDK and runs the localnet workflow.
-`files.py` handles private keys and write-once JSON artifacts.
-`cli.py` and `presentation.py` provide the headless, inline, and Textual
-views over the same model.
+`domain.py` models the original transfer proposal and the typed contract
+proposal. Both commit to a network identity, nonce, chi limit, exact payload,
+and expiry. The signer produces a domain-bound approval and the exact SDK
+transaction signature. Signing and submission verify that identity and the
+transaction hash. The original v1 native transfer messages retain their
+wire shape.
 
-A proposal describes a single `currency.transfer`. Its digest covers the
-wire version, chain ID, first block hash, sender, recipient, exact decimal
-amount, nonce, estimated chi, chi limit, creation time, and expiry. The
-sender signs the SDK transaction payload and a domain-specific message over
-the proposal digest. The CLI verifies both signatures and recomputes the
-transaction hash before submitting. The first block binds the approval to a
-specific localnet for CLI use.
+`state.py` owns the local SQLite transaction boundary. Public account
+metadata, contacts, profiles and watched assets are separate from custody.
+`vault.py` encrypts account secrets with Argon2id and XChaCha20-Poly1305.
+Authenticated data binds each secret to its public account, derivation
+index, and backup version. Plaintext recovery stays in owner-only files or
+in memory for the active operation. A watch-only account has no secret.
 
-The signer is the wallet owner or a trusted bridge. The agent needs the
-sender's public address, the proposal, and the returned approval. The
-messaging system is responsible for user authentication, matching an approval
-to the displayed digest, and secure key custody. The signed transaction is
-relayable, so its recipient and amount are fixed by the chain signature.
-Expiry and first-block verification govern CLI use of the approval, and the
-chain enforces the transaction's signed chain ID and nonce.
+`activity.py` records transaction hashes, receipts and signing reservations.
+The signer serializes signing by network, address and nonce. Revocable
+grant counters and the exact signing reservation commit in one database
+transaction. The journal captures the transaction hash before broadcast so
+it remains available on restart. SDK committed receipts override pending
+attempts. An explicit owner replacement names the previous transaction
+hash and competes for the same nonce.
 
-Submission checks the exact hash before broadcasting. The approval file
-contains enough information to recover the same transaction after a process
-restart, including a broadcast that succeeded but lost its response. A
-pending outcome carries the same hash. Take care when proposing concurrent
-transfers from the same account, since two proposals may capture the same
-next nonce and only one can commit.
+`agent_cli.py` exposes request and approval exchange over a Unix socket.
+The owner configures authentication and authorizes the action through a
+terminal inbox, the Telegram bridge or a preauthorized transfer grant.
+The agent receives the signed artifact and owns submission and recovery.
+The signer database and password live under the signer’s OS authority.
+Revoking a grant prevents future signing and the chain enforces replay
+protection on released signatures.
 
-## Terminal review
+`chain.py` adapts the Xian SDK for simulation, identity, balance, event
+reads and finality. Public HTTPS RPCs use an explicit saved identity.
+`chain_apps.py`, `payments.py`, and `shielded.py` own reviewed product
+operations. x402 keeps its independent permit nonce ledger. Shielded
+operations use the native proof toolkit and encrypted local snapshots.
+The optional WalletConnect sidecar validates session scope and invokes
+the same CLI review and signer for each write.
 
-The browser wallet's dark surfaces and green accent carry over to the
-terminal. Both preview surfaces lead with the exact amount, recipient,
-sender, chain, chi limit, and expiry. Long addresses are rendered in full.
-Textual puts the proposal digest, first block hash, and signed payload fields
-under transaction details. The signing screen requires an explicit action.
-The JSON interface supplies the same decision fields to messaging clients.
+Rich previews, the Textual wallet and the remote review format use
+the same proposal structure. The UI borrows the browser wallet's dark
+surfaces and green accent. Accounts expose receiving addresses and a QR,
+activity preserves status by transaction hash, and each approval presents
+the exact call and limits before signing.

@@ -4,28 +4,41 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xian-tech-wallet-cli"
-version = "0.1.0"
-description = "Localnet Xian wallet for terminals and agents"
+version = "0.2.0"
+description = "Xian wallet for terminals and agents"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
 license = "MIT"
 license-files = ["LICENSE"]
 dependencies = [
+    "aiohttp>=3.13.5,<4",
     "pydantic>=2.12,<3",
+    "pynacl>=1.6,<2",
+    "qrcode>=8,<9",
     "rich>=14,<16",
     "textual>=6,<9",
     "typer>=0.26,<1",
-    "xian-tech-py>=0.5.3,<0.6",
+    "xian-tech-py[hd]>=0.5.3,<0.6",
+    "xian-tech-runtime-types>=0.1.6,<0.2",
+    "yarl>=1.20,<2",
 ]
 
 [project.scripts]
 xian-wallet = "xian_wallet_cli.cli:app"
+
+[project.optional-dependencies]
+shielded = [
+    "xian-tech-zk>=0.2.1,<0.3",
+]
 
 [dependency-groups]
 dev = ["pytest>=9,<10", "pytest-cov>=7,<8", "ruff>=0.15,<0.16"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+xian_wallet_cli = ["walletconnect/*.mjs", "walletconnect/package*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

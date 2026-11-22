@@ -1,0 +1,4 @@
+include AGENTS.md
+include tests/conftest.py
+include tests/walletconnect.test.mjs
+recursive-include docs *.md

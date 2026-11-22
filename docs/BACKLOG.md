@@ -1,7 +1,10 @@
 # Backlog
 
-- Add more asset and transaction types when their account and amount semantics
-  can be presented clearly in an approval.
-- Explore approved-key custody providers for wallet-owner signing.
-- Add integration examples for messaging bridges with authenticated users and
-  proposal-specific callbacks.
+- Add external custody providers and hardware signing where the provider can
+  enforce the Xian transaction and message contracts.
+- Broaden DEX coverage to multi-hop and fee-on-transfer routes with dedicated
+  review of effective amounts.
+- Add shielded relay submission and integration coverage with promoted
+  proving bundles and a full BDS-backed localnet.
+- Expand messaging and WalletConnect integration coverage with real test
+  accounts and relay credentials.
