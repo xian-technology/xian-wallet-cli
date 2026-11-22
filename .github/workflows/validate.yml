@@ -1,0 +1,42 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with:
+          version: "0.13.9"
+          python-version: "3.14"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+
+      - name: Install locked dependencies
+        run: uv sync --locked --extra shielded
+
+      - name: Check lint and formatting
+        run: |
+          uv run --locked --extra shielded ruff check
+          uv run --locked --extra shielded ruff format --check
+
+      - name: Run Python tests
+        run: uv run --locked --extra shielded pytest
+
+      - name: Run WalletConnect tests
+        run: node --test tests/walletconnect.test.mjs
