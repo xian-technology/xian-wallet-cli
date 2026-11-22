@@ -8,8 +8,10 @@ from typer.testing import CliRunner
 from xian_py.wallet import Wallet
 
 from xian_wallet_cli import cli
+from xian_wallet_cli.activity import Activity, Journal
 from xian_wallet_cli.chain import Finality, prepare_transfer, submit_transfer
 from xian_wallet_cli.domain import Network, WalletError, sign_plan
+from xian_wallet_cli.state import Store
 
 SENDER = Wallet("11" * 32)
 RECIPIENT = Wallet("22" * 32).public_key
@@ -131,6 +133,39 @@ def test_each_approval_proof_is_verified(field):
     with pytest.raises(WalletError, match="signature|hash"):
         asyncio.run(submit_transfer(node, plan, altered, 1))
     assert not node.broadcasts
+
+
+def test_receipt_updates_only_the_matching_network(tmp_path, monkeypatch):
+    node = Localnet()
+    first = prepare(node)
+    first_approval = sign_plan(first, SENDER, NOW)
+    node.network = Network(chain_id=NETWORK.chain_id, first_block_hash="B" * 64)
+    second = prepare(node)
+    second_approval = sign_plan(second, SENDER, NOW)
+    assert first_approval.tx_hash == second_approval.tx_hash
+
+    store = Store(tmp_path / "wallet")
+    journal = Journal(store)
+    journal.record(first, first_approval)
+    journal.record(second, second_approval)
+    monkeypatch.setattr(cli, "Rpc", lambda url: node)
+    runner = CliRunner()
+    args = ["--json", "--home", str(store.home), "receipt", second_approval.tx_hash]
+
+    pending = runner.invoke(cli.app, args)
+    assert pending.exit_code == 3, pending.output
+    assert json.loads(pending.stdout)["data"]["status"] == "pending"
+
+    node.final = Finality(tx_hash=second_approval.tx_hash, status="completed", height=5)
+    result = runner.invoke(cli.app, args)
+
+    assert result.exit_code == 0, result.output
+    assert {
+        row.network.first_block_hash: row.status for row in store.entries("activity", Activity)
+    } == {
+        first.network.first_block_hash: "approved",
+        second.network.first_block_hash: "completed",
+    }
 
 
 def test_expired_approval_can_find_receipt_but_cannot_broadcast(monkeypatch):

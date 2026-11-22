@@ -307,13 +307,10 @@ def receipt(ctx: typer.Context, tx_hash: str, wait: Wait = 12) -> None:
     tx_hash = TypeAdapter(Digest).validate_python(tx_hash.strip().upper())
     node = output.node()
     result = asyncio.run(node.wait(tx_hash, wait))
-    if result is not None:
-        journal = Journal(output.store)
-        for item in output.store.entries("activity", Activity):
-            if item.tx_hash == tx_hash:
-                if asyncio.run(node.identity()) == item.network:
-                    journal.update(item.network, result)
-                break
+    if result is not None and any(
+        item.tx_hash == tx_hash for item in output.store.entries("activity", Activity)
+    ):
+        Journal(output.store).update(asyncio.run(node.identity()), result)
     output.finality(result or Finality(tx_hash=tx_hash, status="pending"))
 
 

@@ -67,14 +67,35 @@ def list_networks(ctx: typer.Context) -> None:
 
 @networks.command()
 def remove(ctx: typer.Context, name: str) -> None:
-    ctx.obj.store.remove("network", name)
+    """Remove an inactive profile while retaining at least one saved profile."""
+    with ctx.obj.store.transaction(write=True) as db:
+        deleted = db.execute("DELETE FROM records WHERE namespace='network' AND name=?", (name,))
+        if not deleted.rowcount:
+            raise WalletError("record_not_found", f"No network named {name}.")
+        if db.execute("SELECT 1 FROM records WHERE namespace='network' LIMIT 1").fetchone() is None:
+            raise WalletError(
+                "last_network_profile", "Add another network profile before removing this one."
+            )
+        active = db.execute(
+            "SELECT data FROM records WHERE namespace='settings' AND name='active-network'"
+        ).fetchone()
+        if active and NetworkProfile.model_validate_json(active[0]).name == name:
+            raise WalletError(
+                "active_network_profile",
+                "Select another profile with network use before removing this one.",
+            )
     ctx.obj.emit({"removed": name})
 
 
 @networks.command()
 def use(ctx: typer.Context, name: str) -> None:
-    profile = ctx.obj.store.read("network", name, NetworkProfile)
     with ctx.obj.store.transaction(write=True) as db:
+        record = db.execute(
+            "SELECT data FROM records WHERE namespace='network' AND name=?", (name,)
+        ).fetchone()
+        if record is None:
+            raise WalletError("record_not_found", f"No network named {name}.")
+        profile = NetworkProfile.model_validate_json(record[0])
         db.execute(
             "INSERT OR REPLACE INTO records VALUES ('settings', 'active-network', ?)",
             (profile.model_dump_json(),),

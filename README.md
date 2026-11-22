@@ -51,6 +51,9 @@ chain ID and first-block hash from a trusted source. Add it with
 `network add NAME URL --chain-id ID --first-block-hash HASH`, then select it
 with `network use NAME` or the global `--network NAME` option. Named profiles
 allow explicit HTTPS RPCs. The node must be synced and serve block 1.
+Once you add a profile, the wallet requires at least one saved profile. To
+replace the active profile, add the replacement if needed, select it with
+`network use NAME`, then remove the old profile with `network remove NAME`.
 
 ## Review and send
 
