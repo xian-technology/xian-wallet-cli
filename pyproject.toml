@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xian-tech-wallet-cli"
-version = "0.2.2"
+version = "0.2.3"
 description = "Xian wallet for terminals and agents"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
@@ -18,7 +18,7 @@ dependencies = [
     "rich>=14,<16",
     "textual>=6,<9",
     "typer>=0.29.3,<1",
-    "xian-tech-py[hd]>=0.5.3,<0.6",
+    "xian-tech-py[hd]>=0.5.4,<0.6",
     "xian-tech-runtime-types>=0.1.6,<0.2",
     "yarl>=1.20,<2",
 ]
